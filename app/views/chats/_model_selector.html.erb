@@ -1,0 +1,103 @@
+<!-- Model Selector Modal -->
+<div id="model-selector-modal" class="hidden fixed inset-0 z-50 overflow-y-auto" data-controller="model-selector">
+  <div class="flex min-h-screen items-center justify-center p-4">
+    <!-- Background overlay -->
+    <div class="fixed inset-0 bg-black/50 transition-opacity" data-action="click->model-selector#close"></div>
+
+    <!-- Modal panel -->
+    <div class="relative z-10 w-full max-w-lg rounded-xl bg-white dark:bg-neutral-800 shadow-xl">
+      <!-- Header -->
+      <div class="flex items-center justify-between border-b border-neutral-200 dark:border-neutral-700 px-6 py-4">
+        <h3 class="text-lg font-semibold text-neutral-900 dark:text-neutral-100" id="modal-title">
+          Velg AI-modell
+        </h3>
+        <button type="button" data-action="click->model-selector#close" class="rounded-lg p-1 text-neutral-400 hover:text-neutral-500 dark:hover:text-neutral-300">
+          <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Body -->
+      <div class="p-6">
+            
+            <!-- Current Model Display -->
+            <div class="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-sm border border-blue-200 dark:border-blue-800">
+              <div class="flex items-center gap-2">
+                <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path>
+                </svg>
+                <div>
+                  <p class="text-sm font-medium text-neutral-900 dark:text-white">Nåværende modell</p>
+                  <p class="text-xs text-neutral-600 dark:text-neutral-400 font-mono">
+                    <%= ENV["AZURE_OPENAI_ENDPOINT"].present? ? ENV.fetch("AZURE_LLM_DEPLOYMENT", ENV["LLM_MODEL"]) : ENV["LLM_MODEL"] || "granite-4.0-h-tiny" %>
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Available Models List -->
+            <div class="space-y-2">
+              <h4 class="text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">Tilgjengelige modeller:</h4>
+              
+              <%
+                # Build model list dynamically based on configuration
+                models = []
+                
+                # Azure OpenAI models (if configured)
+                if ENV["AZURE_OPENAI_ENDPOINT"].present?
+                  azure_deployment = ENV.fetch("AZURE_LLM_DEPLOYMENT", "gpt-5-chat")
+                  models << { id: azure_deployment, name: "GPT-5 Chat", size: "Azure", description: "Azure AI Foundry (sky)", category: "azure" }
+                end
+                
+                # Local/Docker Hub AI models
+                models += [
+                  { id: "ai/granite-4.0-h-tiny", name: "Granite 4.0 Tiny", size: "7B", description: "Rask og effektiv (lokal)", category: "local" },
+                  { id: "ai/granite-4.0-h-small", name: "Granite 4.0 Small", size: "32B", description: "Større og smartere (lokal)", category: "local" },
+                  { id: "ai/mistral", name: "Mistral", size: "7B", description: "Høy ytelse (lokal)", category: "local" },
+                  { id: "ai/llama3.3", name: "Llama 3.3", size: "70B", description: "Meta's modell (lokal)", category: "local" },
+                  { id: "ai/deepseek-r1-distill-llama", name: "DeepSeek R1", size: "70B", description: "Avansert resonnering (lokal)", category: "local" },
+                ]
+              %>
+              
+              <%
+                current_model = ENV["AZURE_OPENAI_ENDPOINT"].present? ? ENV.fetch("AZURE_LLM_DEPLOYMENT", ENV["LLM_MODEL"]) : ENV["LLM_MODEL"]
+              %>
+              <% models.each do |model| %>
+                <div class="p-3 border border-neutral-200 dark:border-neutral-700 rounded-sm hover:bg-neutral-50 dark:hover:bg-neutral-700/50 cursor-pointer transition-colors <%= 'bg-blue-50 dark:bg-blue-900/20 border-primary' if current_model == model[:id] %>">
+                  <div class="flex items-start justify-between">
+                    <div class="flex-1">
+                      <div class="flex items-center gap-2">
+                        <p class="text-sm font-medium text-neutral-900 dark:text-white"><%= model[:name] %></p>
+                        <span class="text-xs px-2 py-0.5 rounded-full <%= model[:category] == 'azure' ? 'bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200' : 'bg-neutral-200 dark:bg-neutral-700 text-neutral-700 dark:text-neutral-300' %>"><%= model[:size] %></span>
+                      </div>
+                      <p class="text-xs text-neutral-600 dark:text-neutral-400 mt-1"><%= model[:description] %></p>
+                      <p class="text-xs text-neutral-500 dark:text-neutral-500 font-mono mt-1"><%= model[:id] %></p>
+                    </div>
+                    <% if current_model == model[:id] %>
+                      <svg class="w-5 h-5 text-primary flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                      </svg>
+                    <% end %>
+                  </div>
+                </div>
+              <% end %>
+            </div>
+
+        <!-- Info Note -->
+        <div class="mt-4 p-3 bg-neutral-50 dark:bg-neutral-700/50 rounded-sm">
+          <p class="text-xs text-neutral-600 dark:text-neutral-400">
+            <strong>Merk:</strong> For å endre modell, oppdater <code class="px-1 py-0.5 bg-neutral-200 dark:bg-neutral-800 rounded text-xs">LLM_MODEL</code> i .env-filen og start Docker på nytt.
+          </p>
+        </div>
+      </div>
+      
+      <!-- Footer -->
+      <div class="flex justify-end gap-2 border-t border-neutral-200 dark:border-neutral-700 px-6 py-4">
+        <button type="button" data-action="click->model-selector#close" class="rounded-lg bg-neutral-200 dark:bg-neutral-700 hover:bg-neutral-300 dark:hover:bg-neutral-600 px-4 py-2 text-sm font-semibold text-neutral-900 dark:text-neutral-100 shadow-sm transition-colors">
+          Lukk
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
