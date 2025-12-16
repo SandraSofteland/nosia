@@ -55,18 +55,19 @@ module.exports = {
       },
       
       fontFamily: {
-        // Medietilsynet Typography
-        'graphik': ['Graphik Web', 'system-ui', 'sans-serif'],
+        // Medietilsynet Typography (using Inter as Graphik Web alternative)
+        'graphik': ['Inter', 'system-ui', 'sans-serif'],
         'merriweather': ['Merriweather', 'Georgia', 'serif'],
-        'play': ['Play', 'sans-serif'],
+        'play': ['Inter', 'sans-serif'],
         
         // Semantic font aliases
-        sans: ['Graphik Web', 'system-ui', 'sans-serif'],
+        sans: ['Inter', 'system-ui', 'sans-serif'],
         serif: ['Merriweather', 'Georgia', 'serif'],
       },
       
       fontSize: {
         // Medietilsynet Typography Scale
+        'base': ['18px', { lineHeight: '1.6' }],
         'heading-1': ['18px', { lineHeight: '1.4', fontWeight: '700' }],
         'link': ['18px', { lineHeight: '1.4', fontWeight: '400' }],
         'button': ['18px', { lineHeight: '1.56', fontWeight: '400' }],
