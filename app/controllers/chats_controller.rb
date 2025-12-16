@@ -24,6 +24,12 @@ class ChatsController < ApplicationController
       end
     end
 
+    # Attach selected documents to the chat
+    if params[:document_ids].present?
+      document_ids = params[:document_ids].reject(&:blank?).map(&:to_i)
+      @chat.document_ids = document_ids
+    end
+
     # Create the user message immediately for instant display
     @user_message = @chat.messages.create!(role: "user", content: prompt)
 

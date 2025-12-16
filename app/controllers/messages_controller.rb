@@ -4,6 +4,14 @@ class MessagesController < ApplicationController
   def create
     return unless content.present?
 
+    # Add documents to chat if provided
+    if params[:document_ids].present?
+      document_ids = params[:document_ids].reject(&:blank?).map(&:to_i)
+      # Add new documents without removing existing ones
+      new_document_ids = document_ids - @chat.document_ids
+      @chat.document_ids += new_document_ids if new_document_ids.any?
+    end
+
     # Create the user message immediately for instant display
     @user_message = @chat.messages.create!(role: "user", content: content)
 

@@ -14,6 +14,8 @@ class Chat < ApplicationRecord
   belongs_to :user
   has_many :chats, dependent: :destroy
   has_many :messages, dependent: :destroy
+  has_many :chat_documents, dependent: :destroy
+  has_many :documents, through: :chat_documents
 
   scope :root, -> { where(chat_id: nil) }
 
